@@ -116,33 +116,40 @@ export function sembrarSiVacio(): void {
   const filas = get<{ n: number }>("SELECT COUNT(*) AS n FROM familias");
   if (filas && filas.n > 0) return;
 
-  transaccion(() => {
-    const { hash, salt } = hashPin("1234");
-    const fId = run(
-      "INSERT INTO familias (nombre, pin_hash, pin_salt) VALUES (?,?,?)",
-      "Los López", hash, salt
-    ).lastInsertRowid;
+  try {
+    transaccion(() => {
+      const { hash, salt } = hashPin("1234");
+      const fId = run(
+        "INSERT OR IGNORE INTO familias (nombre, pin_hash, pin_salt) VALUES (?,?,?)",
+        "Los López", hash, salt
+      ).lastInsertRowid;
+      // Si otro worker ya sembró, lastInsertRowid es 0 y la familia ya existe
+      const fam = get<{ id: number }>("SELECT id FROM familias WHERE nombre = ?", "Los López");
+      if (!fam) return;
+      const ya = get<{ n: number }>("SELECT COUNT(*) AS n FROM miembros WHERE familia_id = ?", fam.id);
+      if (ya && ya.n > 0) return;
+      const fid = fam.id;
 
     run(
       `INSERT INTO miembros (familia_id, usuario, rol, nombre, avatar, mesada_periodo)
        VALUES (?,?,?,?,?, 'mensual')`,
-      fId, "papa", "parent", "Pablo", "👨"
+      fid, "papa", "parent", "Pablo", "👨"
     );
     run(
       `INSERT INTO miembros (familia_id, usuario, rol, nombre, avatar, mesada_periodo)
        VALUES (?,?,?,?,?, 'mensual')`,
-      fId, "mama", "parent", "Mariana", "👩"
+      fid, "mama", "parent", "Mariana", "👩"
     );
 
     const santi = run(
       `INSERT INTO miembros (familia_id, usuario, rol, nombre, fecha_nacimiento, avatar, nivel, mesada_monto, mesada_periodo, mesada_ultimo_pago)
        VALUES (?,?,?,?,?,?,?,?,?,?)`,
-      fId, "santi", "child", "Santiago", "2011-01-12", "🦊", 2, 20000, "mensual", fechaOffset(-1)
+      fid, "santi", "child", "Santiago", "2011-01-12", "🦊", 2, 20000, "mensual", fechaOffset(-1)
     ).lastInsertRowid;
     const vale = run(
       `INSERT INTO miembros (familia_id, usuario, rol, nombre, fecha_nacimiento, avatar, nivel, mesada_monto, mesada_periodo, mesada_ultimo_pago)
        VALUES (?,?,?,?,?,?,?,?,?,?)`,
-      fId, "vale", "child", "Valentina", "2013-03-08", "🐱", 3, 15000, "mensual", fechaOffset(-1)
+      fid, "vale", "child", "Valentina", "2013-03-08", "🐱", 3, 15000, "mensual", fechaOffset(-1)
     ).lastInsertRowid;
 
     run("INSERT INTO wallets (miembro_id, saldo, ahorrado) VALUES (?,?,?)", santi, 85000, 15000);
@@ -155,7 +162,7 @@ export function sembrarSiVacio(): void {
       run(
         `INSERT INTO movimientos (familia_id, miembro_id, tipo, monto, categoria, descripcion, estado, creado_en)
          VALUES (?,?,?,?,?,?,?, datetime('now', ?))`,
-        fId, miembro, tipo, monto, categoria, descripcion, estado, `-${dias} days`
+        fid, miembro, tipo, monto, categoria, descripcion, estado, `-${dias} days`
       );
 
     // Movimientos de Santiago
@@ -195,13 +202,14 @@ export function sembrarSiVacio(): void {
     // Pedidos
     run(
       "INSERT INTO pedidos (familia_id, miembro_id, monto, motivo, estado) VALUES (?,?,?,?,'pendiente')",
-      fId, santi, 30000, "Zapatillas para el torneo"
+      fid, santi, 30000, "Zapatillas para el torneo"
     );
     run(
       "INSERT INTO pedidos (familia_id, miembro_id, monto, motivo, estado, respuesta, creado_en) VALUES (?,?,?,?,'aprobado',?, datetime('now','-4 days'))",
-      fId, vale, 5000, "Salida al cine con las amigas", "Dale, disfrutá"
+      fid, vale, 5000, "Salida al cine con las amigas", "Dale, disfrutá"
     );
-  });
+    });
+  } catch {}
 }
 
 // ---------------------------------------------------------------------------
