@@ -8,11 +8,5 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 22.11.0
-      - key: LAZO_DATA_DIR
-        value: /var/data
       - key: LAZO_SECURE_COOKIE
         value: "true"
-    disk:
-      name: lazodeplata-data
-      mountPath: /var/data
-      sizeGB: 1
