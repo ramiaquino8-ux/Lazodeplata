@@ -28,14 +28,9 @@ export default async function LoginPage() {
             <p className="text-lg font-bold leading-tight text-slate-900">
               LazoDePlata
             </p>
-            <p className="text-xs text-slate-500">
-              Plata simulada, proyecto educativo.
-            </p>
+            <p className="text-xs text-slate-500">Plata simulada</p>
           </div>
         </div>
-        <p className="hidden text-xs text-slate-500 sm:block">
-          Sin cuentas, sin contraseñas, sin internet.
-        </p>
       </header>
 
       <div className="grid flex-1 items-center gap-10 md:grid-cols-2">
@@ -60,9 +55,9 @@ export default async function LoginPage() {
           <div className="mt-8 rounded-2xl border border-indigo-100 bg-indigo-50 p-4 text-sm text-indigo-900">
             <p className="font-semibold">¿Querés probar con datos cargados?</p>
             <p className="mt-1">
-              Familia <strong>Los López</strong> — entrá con usuario{" "}
+              Familia <strong>Los López</strong> — PIN <strong>1234</strong>, usuario{" "}
               <strong>papa</strong>, <strong>mama</strong>, <strong>santi</strong> o{" "}
-              <strong>vale</strong>. Sin contraseña.
+              <strong>vale</strong>.
             </p>
           </div>
         </section>
@@ -70,10 +65,7 @@ export default async function LoginPage() {
         <LoginForm />
       </div>
 
-      <footer className="mt-12 text-center text-xs text-slate-400">
-        LazoDePlata es un proyecto educativo de Coderhouse. La plata es simulada:
-        no hay dinero real, tarjetas ni cuentas bancarias.
-      </footer>
+      <footer className="mt-12 text-center text-xs text-slate-400">LazoDePlata</footer>
     </main>
   );
 }

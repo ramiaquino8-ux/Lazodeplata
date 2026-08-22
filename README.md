@@ -1,17 +1,15 @@
 # LazoDePlata
 
-Plata simulada para que chicos aprendan a administrar su plata. Proyecto
-educativo de Coderhouse: **no hay dinero real, tarjetas ni cuentas bancarias**.
+Plata simulada para que chicos aprendan a administrar su plata.
 
 Cada familia elige el nombre de la familia, un **PIN** (4 a 10 números) y los
-usuarios. No hay contraseñas: al entrar se guarda una cookie (`lazo_sesion`,
-httpOnly, 1 año) y toda la información queda en una base SQLite local. El PIN se
-guarda **hasheado** (`scrypt`), nunca en texto plano.
+usuarios. Al entrar se guarda una cookie (`lazo_sesion`, httpOnly, 1 año) y toda
+la información queda en una base SQLite local. El PIN se guarda **hasheado**
+(`scrypt`), nunca en texto plano.
 
 ## Requisitos
 
 - Node.js **22.5+** (usa `node:sqlite`, nativo). Probado con Node 26.
-- Todo es offline: no hace falta internet ni servicios externos.
 
 ## Puesta en marcha
 
