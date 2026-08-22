@@ -7,6 +7,6 @@ services:
     startCommand: npm run start
     envVars:
       - key: NODE_VERSION
-        value: 22.16.0
+        value: 24.4.0
       - key: LAZO_SECURE_COOKIE
         value: "true"
