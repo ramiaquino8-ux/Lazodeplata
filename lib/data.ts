@@ -85,26 +85,34 @@ CREATE TABLE IF NOT EXISTS pedidos (
 `;
 
 export function iniciarBase(): void {
-  db.exec(SCHEMA);
-  const columnas = db.prepare("PRAGMA table_info(pedidos)").all() as {
-    name: string;
-  }[];
-  if (!columnas.some((c) => c.name === "monto_oferta")) {
-    db.exec("ALTER TABLE pedidos ADD COLUMN monto_oferta INTEGER;");
+  if (process.env.NEXT_PHASE === "phase-production-build") return;
+  try {
+    db.exec(SCHEMA);
+    const columnas = db.prepare("PRAGMA table_info(pedidos)").all() as {
+      name: string;
+    }[];
+    if (!columnas.some((c) => c.name === "monto_oferta")) {
+      db.exec("ALTER TABLE pedidos ADD COLUMN monto_oferta INTEGER;");
+    }
+    const famColumnas = db.prepare("PRAGMA table_info(familias)").all() as {
+      name: string;
+    }[];
+    if (!famColumnas.some((c) => c.name === "pin_hash")) {
+      db.exec("ALTER TABLE familias ADD COLUMN pin_hash TEXT;");
+    }
+    if (!famColumnas.some((c) => c.name === "pin_salt")) {
+      db.exec("ALTER TABLE familias ADD COLUMN pin_salt TEXT;");
+    }
+    sembrarSiVacio();
+  } catch (e) {
+    if (String(e).includes("database is locked")) return;
+    throw e;
   }
-  const famColumnas = db.prepare("PRAGMA table_info(familias)").all() as {
-    name: string;
-  }[];
-  if (!famColumnas.some((c) => c.name === "pin_hash")) {
-    db.exec("ALTER TABLE familias ADD COLUMN pin_hash TEXT;");
-  }
-  if (!famColumnas.some((c) => c.name === "pin_salt")) {
-    db.exec("ALTER TABLE familias ADD COLUMN pin_salt TEXT;");
-  }
-  sembrarSiVacio();
 }
 
-iniciarBase();
+if (process.env.NEXT_PHASE !== "phase-production-build") {
+  iniciarBase();
+}
 
 function fechaOffset(dias: number): string {
   const f = new Date();
